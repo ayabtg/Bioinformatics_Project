@@ -5,32 +5,24 @@ This file describes the directory layout for the RNA practical (TP_RNA) and give
 Directory layout
 
 TP_RNA/
+│
+├── data/
+│   ├── pdb_train/      # PDB files for training (text `.pdb` files)
+│   └── pdb_test/       # PDB files for testing (e.g. RNA-Puzzles)
+│
+├── output/
+│   ├── profiles/       # per-structure score/profile files (CSV)
+│   ├── plots/          # exported profile images (PNG, PDF)
+│   └── potentials/     # learned potentials per base-pair (AA, AU, AC, AG, UU, UC, UG, CC, CG, GG)
+│
+├── scripts/
+│   ├── train_potential.py   # Python script to train the statistical potential
+│   ├── score_structure.py   # Python script to score a structure and produce a CSV profile
+│   └── plot_profiles.R      # R script to plot profiles (expects `position,score` CSV)
+│
+├── STRUCTURE.md        # this file — detailed description and examples
+README.md           # short overview
 
-  data/
-
-    pdb_train/          # PDB files for training (text `.pdb` files)
-
-    pdb_test/           # PDB files for testing (e.g. RNA‑Puzzles)
-
-  output/
-
-    profiles/           # per-structure score/profile files (CSV)
-
-    plots/              # exported profile images (PNG, PDF)
-
-    potentials/         # learned potentials per base-pair (one file per pair: AA, AU, AC, AG, UU, UC, UG, CC, CG, GG)
-
-  scripts/
-
-    train_potential.py  # Python template to train a potential
-
-    score_structure.py  # Python template to score a structure and produce a profile
-
-    plot_profiles.R     # R script to plot profiles (expects `position,score` CSV)
-
-  STRUCTURE.md          # this file — detailed description and examples
-  
-README.md               # short overview
 
 Conventions and expected formats
 

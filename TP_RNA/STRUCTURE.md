@@ -4,24 +4,30 @@ This file describes the directory layout for the RNA practical (TP_RNA) and give
 
 Directory layout
 
-TP_RNA/
+Bioinformatics_Project/
 │
-├── data/
-│   ├── pdb_train/      # PDB files for training (text `.pdb` files)
-│   └── pdb_test/       # PDB files for testing (e.g. RNA-Puzzles)
+├── README.md                           # global documentation for the entire repository
+├── .gitignore                          # Git ignore rules
 │
-├── output/
-│   ├── profiles/       # per-structure score/profile files (CSV)
-│   ├── plots/          # exported profile images (PNG, PDF)
-│   └── potentials/     # learned potentials per base-pair (AA, AU, AC, AG, UU, UC, UG, CC, CG, GG)
-│
-├── scripts/
-│   ├── train_potential.py   # Python script to train the statistical potential
-│   ├── score_structure.py   # Python script to score a structure and produce a CSV profile
-│   └── plot_profiles.R      # R script to plot profiles (expects `position,score` CSV)
-│
-├── STRUCTURE.md        # this file — detailed description and examples
-README.md           # short overview
+└── TP_RNA/                             # RNA practical project (main module)
+    │
+    ├── data/                           # input RNA 3D structures
+    │   ├── pdb_train/                  # PDB files used to train the potential
+    │   └── pdb_test/                   # PDB files used for testing/scoring
+    │
+    ├── output/                         # automatically generated outputs
+    │   ├── profiles/                   # score profiles (CSV)
+    │   ├── plots/                      # profile plots (PNG/PDF)
+    │   └── potentials/                 # learned potentials (AA, AU, AC, …)
+    │
+    ├── scripts/                        # core code of the project
+    │   ├── train_potential.py          # compute statistical potentials from pdb_train/
+    │   ├── score_structure.py          # score a structure using learned potentials
+    │   └── plot_profiles.R             # plot score profiles
+    │
+    ├── STRUCTURE.md                    # detailed explanation of folder layout
+    └── .gitkeep                        # keeps empty folders tracked by Git
+
 
 
 Conventions and expected formats

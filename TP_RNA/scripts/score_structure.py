@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """score_structure.py
-Template pour scorer une structure et produire un fichier de profil (placeholder).
+Template to score an RNA 3D structure using learned potentials.
+Reads a PDB file and produces a profile of energy scores.
 """
 import sys
 
 
 def score_structure(pdb_path, out_path):
-    # TODO: implémenter le calcul de score réel
+    # TODO: implement real scoring using potentials
     print(f"Scoring {pdb_path} -> {out_path}")
     with open(out_path, 'w') as f:
-        f.write(f"# profil placeholder pour {pdb_path}\n")
+        f.write(f"# placeholder profile for {pdb_path}\n")
 
 
 if __name__ == '__main__':

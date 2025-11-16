@@ -2,8 +2,9 @@
 
 This file describes the directory layout for the RNA practical (TP_RNA) and gives usage examples.
 
-Directory layout
-
+ Directory layout
+ 
+```
 Bioinformatics_Project/
 │
 ├── README.md                           # global documentation for the entire repository
@@ -27,7 +28,7 @@ Bioinformatics_Project/
     │
     ├── STRUCTURE.md                    # detailed explanation of folder layout
     └── .gitkeep                        # keeps empty folders tracked by Git
-
+```
 
 
 Conventions and expected formats

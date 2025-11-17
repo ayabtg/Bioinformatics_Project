@@ -162,13 +162,13 @@ python scripts/train_potential.py --data-dir data/pdb_train --output-dir output/
 Score a structure:
 
 ```bash
-python scripts/score_structure.py data/pdb_test/example.pdb output/profiles/example.profile.csv
+python scripts/score_structure.py data/pdb_test/<name>.pdb output/profiles/<name>.profile.csv
 ```
 
 Plot the profile:
 
 ```bash
-Rscript scripts/plot_profiles.R output/profiles/example.profile.csv output/plots/example.png
+Rscript scripts/plot_profiles.R output/profiles/<name>.profile.csv output/plots/<name>.png
 ```
 
 ## 📌 Requirements

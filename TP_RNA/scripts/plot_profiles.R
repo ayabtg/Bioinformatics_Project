@@ -1,23 +1,18 @@
-# plot_profiles.R
-# Minimal R script to plot energy profiles for base-pair potentials.
-# Usage: Rscript plot_profiles.R input_profile.csv output_plot.png
-
-args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 2) {
-  stop('Usage: plot_profiles.R <input_csv> <output_png>')
-}
-
+#!/usr/bin/env Rscript
 library(ggplot2)
 
+args <- commandArgs(trailingOnly=TRUE)
 input <- args[1]
 output <- args[2]
 
-# Expected CSV columns: position, score
-df <- try(read.csv(input), silent = TRUE)
-if (inherits(df, 'try-error')) {
-  stop('Cannot read input file')
-}
+df <- read.csv(input)
 
-p <- ggplot(df, aes(x=position, y=score)) + geom_line() + theme_minimal()
+p <- ggplot(df, aes(x = position, y = score)) +
+  geom_line(color="blue") +
+  geom_point(size=1) +
+  theme_minimal() +
+  ggtitle("RNA Statistical Potential Profile") +
+  xlab("Nucleotide position") +
+  ylab("Energy score")
 
-ggsave(output, plot = p)
+ggsave(output, p, width=7, height=4)

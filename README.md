@@ -1,6 +1,6 @@
 # README.md – TP_RNA Project
 
-## 🧬 Overview
+## Overview
 
 This project implements a small RNA 3D structure analysis pipeline based on the TP instructions.
 
@@ -14,7 +14,7 @@ The goal is to:
 This scoring approach is inspired by RNA knowledge-based potentials used in structural biology.
 The pseudo-energy approximates the Gibbs free energy of an RNA conformation.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 TP_RNA/
@@ -36,7 +36,7 @@ TP_RNA/
 └── README.md
 ```
 
-## 🔍 What the project does
+## What the project does
 
 ### 1. Dataset creation (PDB files)
 
@@ -171,7 +171,7 @@ Plot the profile:
 Rscript scripts/plot_profiles.R output/profiles/<name>.profile.csv output/plots/<name>.png
 ```
 
-## 📌 Requirements
+##  Requirements
 
 - Python 3
 - R + ggplot2
@@ -180,7 +180,7 @@ Rscript scripts/plot_profiles.R output/profiles/<name>.profile.csv output/plots/
   - pandas
   - biopython (optional, for easier PDB parsing)
 
-## ⚡ Quick usage
+## Quick usage
 
 - Put training PDBs in `data/pdb_train/`
 - Put test PDBs in `data/pdb_test/`

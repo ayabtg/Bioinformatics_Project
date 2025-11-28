@@ -151,7 +151,7 @@ The plot helps identify:
 - Low-energy regions → good / native-like
 - High-energy regions → unusual / possibly misfolded
 
-## ▶️ How to run the project
+##  How to run the project
 
 Train the potential:
 

@@ -6,7 +6,6 @@ from Bio import PDB
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
-
 from Train_potential import (
     extract_c3_atoms,
     calculate_ED,
@@ -15,9 +14,6 @@ from Train_potential import (
 )
 
 from plot_potential import load_all_potentials
-
-
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -53,9 +49,6 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-
-
-
 def get_raw_distances(structure, atom_type="C3'"):
     distances = {bp: [] for bp in BASE_PAIRS}
 
@@ -83,9 +76,6 @@ def get_raw_distances(structure, atom_type="C3'"):
 
     return distances
 
-
-
-
 def score_interpolated(profile, dist):
     bins, scores = profile
 
@@ -101,9 +91,6 @@ def score_interpolated(profile, dist):
     return scores[idx] + fraction * (scores[idx + 1] - scores[idx])
 
 
-
-
-
 def compute_total_score(distances, potentials):
     total = 0.0
 
@@ -114,10 +101,6 @@ def compute_total_score(distances, potentials):
             total += score_interpolated(profile, d)
 
     return total
-
-
-
-
 
 def main():
     args = parse_args()
@@ -162,3 +145,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

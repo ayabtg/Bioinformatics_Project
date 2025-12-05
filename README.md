@@ -164,6 +164,8 @@ future_directions/
 ├── results/             # CSVs and ID lists
 └── figures/             # PNG plots
 ```
+Pipeline Overview:
+<img width="2968" height="1767" alt="image" src="https://github.com/user-attachments/assets/483c0998-e653-4ff4-825d-7e60d96ae1c2" />
 
 ## Requirements
 
@@ -172,3 +174,123 @@ Python 3.8+
 Recommended to use a virtual environment.
 
 Install Python dependencies:
+
+```
+pip install pandas matplotlib
+```
+## 1. Cleaning & validating PDB files
+
+This step removes non-structural records and some problematic alternate locations.
+
+From inside future_directions/:
+```
+python scripts/clean_pdb.py
+
+```
+### Input
+
+pdb_train/
+
+### Output
+
+pdb_train_clean/ – cleaned PDB files (same filenames as input)
+
+## 2. Building train/test ID lists
+
+We generate simple lists of PDB IDs (without the .pdb extension) for later use.
+```
+python scripts/build_splits.py
+```
+### Outputs (in results/):
+
+train_ids.txt – one PDB ID per line for the cleaned training set
+
+test_ids.txt – one PDB ID per line for the test set
+
+## 3. Computing clashes and contacts
+
+This script parses each PDB, estimates:
+
+number of residues (sequence length),
+
+number of chains,
+
+approximate non-bonded contacts,
+
+approximate steric clashes.
+
+```
+python scripts/compute_clashes_contacts.py
+```
+### Output
+
+results/pdb_stats.csv
+
+Each row corresponds to one structure and contains:
+
+image will here
+
+## 4. Generating dataset-level plots
+
+We visualize the distributions of the basic statistics computed above.
+```
+python scripts/plot_basic_stats.py
+```
+
+### Inputs
+
+results/pdb_stats.csv
+
+### Outputs (in figures/):
+
+length_distribution.png
+
+chains_distribution.png
+
+contacts_distribution.png
+
+clashes_distribution.png
+
+## 5. End-to-end reproduction
+
+To regenerate all outputs from scratch (assuming pdb_train/ and pdb_test/ already exist):
+```
+cd future_directions
+
+python scripts/clean_pdb.py
+python scripts/build_splits.py
+python scripts/compute_clashes_contacts.py
+python scripts/plot_basic_stats.py
+
+```
+After these commands:
+
+cleaned PDBs are in pdb_train_clean/
+
+ID lists are in results/train_ids.txt and results/test_ids.txt
+
+per-structure statistics are in results/pdb_stats.csv
+
+figures are in figures/
+
+## 6. Summary of generated files
+| File / folder                       | Description                               |
+| ----------------------------------- | ----------------------------------------- |
+| `pdb_train_clean/`                  | Cleaned training PDB files                |
+| `results/train_ids.txt`             | Final list of training PDB IDs            |
+| `results/test_ids.txt`              | Final list of test PDB IDs                |
+| `results/pdb_stats.csv`             | Length, chains, contacts, clashes per PDB |
+| `figures/length_distribution.png`   | Histogram of sequence lengths             |
+| `figures/chains_distribution.png`   | Histogram of number of chains             |
+| `figures/contacts_distribution.png` | Histogram of contacts per structure       |
+| `figures/clashes_distribution.png`  | Histogram of clashes per structure        |
+
+## 7. Notes and assumptions
+
+Only ATOM, HETATM, TER, and END records are kept during cleaning.
+
+Atoms with alternate location indicators other than " " or "A" are discarded.
+
+Hydrogens are ignored when computing contacts and clashes.
+
+Contact and clash thresholds are currently fixed at 4.5 Å and 2.0 Å, respectively.

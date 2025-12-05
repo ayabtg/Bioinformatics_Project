@@ -182,26 +182,6 @@ pip install pandas matplotlib
 ```
 ## Methods
 
-### Dataset and preprocessing
-
-We collected eight RNA PDB structures provided in the TP (six for training and two for testing) and organised them into data/pdb_train and data/pdb_test. Using a Biopython script (clean_pdb.py), we extracted only RNA residues (A, C, G, U), removed water and non-RNA entities, and discarded alternative locations except the main conformation. For each structure, we counted the number of RNA chains, the total RNA length, and the number of residues missing backbone atoms (P, O5’, C5’, C4’, C3’, O3’). The cleaning statistics are stored in clean_summary.csv, and the cleaned PDB files are written into data/pdb_clean/train and data/pdb_clean/test.
-
-### Train/test lists
-
-The train and test sets were already defined at the PDB level by the teaching staff. We simply generated explicit ID lists by listing all .pdb filenames in data/pdb_train and data/pdb_test and stripping the extension (build_splits.py). This produced train_ids.txt and test_ids.txt, which are used downstream by other scripts.
-
-### Definition of steric clashes
-
-Steric clashes were computed on the cleaned structures (compute_clashes_contacts.py). We first collected all heavy atoms (non-hydrogen) from RNA residues and built a NeighborSearch index. For each atom pair within 3.5 Å, we estimated van der Waals overlap using simple element-specific radii (C, N, O, P, S). A steric clash was defined when the overlap (sum of radii minus interatomic distance) exceeded 0.4 Å. For each PDB, we counted the number of clashing residue pairs, the maximum overlap observed, and normalised the number of clashes per 100 nucleotides.
-
-### Definition of residue–residue contacts
-
-Residue–residue contacts were defined at the nucleotide level: two residues are in contact if any pair of atoms between them is within 4.5 Å. Using the same NeighborSearch index, we enumerated all unique residue pairs satisfying this distance criterion. For each structure we report the total number of contacts and the average number of contacts per residue. All results are stored in geometry_summary.csv.
-
-### Dataset-level statistics and figures
-
-We used plot_basic_stats.py and plot_clashes_contacts.py to generate dataset-level plots from clean_summary.csv and geometry_summary.csv. The figures include the distribution of total RNA length, the number of RNA chains per structure, the distribution of steric clashes per 100 nucleotides, the distribution of contacts per residue, and a scatter plot of the number of contacts as a function of RNA length.
-
 ## 1. Cleaning & validating PDB files
 
 This step removes non-structural records and some problematic alternate locations.

@@ -165,7 +165,7 @@ future_directions/
 └── figures/             # PNG plots
 ```
 Pipeline Overview:
-<img width="2968" height="1767" alt="image" src="https://github.com/user-attachments/assets/483c0998-e653-4ff4-825d-7e60d96ae1c2" />
+<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_direction/figures/pipeline.png" />
 
 ## Requirements
 
@@ -228,7 +228,9 @@ results/pdb_stats.csv
 
 Each row corresponds to one structure and contains:
 
-image will here
+
+<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_direction/figures/pipeline.png" />
+
 
 ## 4. Generating dataset-level plots
 

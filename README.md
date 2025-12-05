@@ -54,7 +54,7 @@ Parameter	Description	Default
 
 Example
 bash
-Copier le code
+
 python3 scripts/train_potential.py \
     --data-dir data/pdb_train \
     --output-dir output/potentials \
@@ -65,7 +65,6 @@ python3 scripts/train_potential.py \
 This creates files such as:
 
 python-repl
-Copier le code
 AA.potential
 AC.potential
 AG.potential
@@ -73,11 +72,11 @@ AG.potential
 UU.potential
 
 ## 3️⃣ Scoring an RNA Structure (score_structure.py)
+
 This script evaluates an RNA structure using the trained potentials and produces a CSV scoring profile.
 
 General Command
 bash
-Copier le code
 python3 scripts/score_structure.py \
     --input-pdb <PDB_FILE_TO_SCORE> \
     --potentials-dir <POTENTIALS_DIRECTORY> \
@@ -96,7 +95,6 @@ Parameter	Description	Default
 --atom	Atom to analyze	"C3'"
 
 Example
-bash
 python3 scripts/score_structure.py \
     --input-pdb data/pdb_test/1EHZ.pdb \
     --potentials-dir output/potentials \
@@ -107,7 +105,6 @@ python3 scripts/score_structure.py \
 Output file:
 
 bash
-Copier le code
 output/profiles/1EHZ_profile.csv
 The CSV contains, for each nucleotide:
 
@@ -130,12 +127,13 @@ All behavior is controlled through CLI flags — this is the purpose of parametr
 Each run documents its own parameters, making comparisons straightforward.
 
 ## 5️⃣ Quick Reference (Cheat Sheet)
+
 Train:
 bash
-Copier le code
 python3 scripts/train_potential.py \
     --data-dir data/pdb_train \
     --output-dir output/potentials
+    
 Score:
 
 bash

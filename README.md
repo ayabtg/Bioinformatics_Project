@@ -170,6 +170,7 @@ Below is the full processing pipeline used for the dataset.
 **Paste the pipeline figure here:**
 
 ### **Pipeline Diagram**
+Expected plot:
+<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_direction/figures/pipeline.png" />
 
-![PDB Processing Pipeline](figures/pipeline.png)
 

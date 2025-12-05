@@ -126,3 +126,42 @@ Y-axis: Statistical Energy
 Expected plot:
 <img width="2968" height="1767" alt="image" src="https://github.com/user-attachments/assets/483c0998-e653-4ff4-825d-7e60d96ae1c2" />
 
+## Additional work: PDB dataset preparation and quality analysis
+
+This section documents the additional work done on the **PDB dataset cleaning and analysis** pipeline in the `future_directions/` folder.
+
+### Overview
+
+The pipeline takes raw PDB structures and:
+
+1. Cleans and validates them (`clean_pdb.py`).
+2. Builds final train/test ID lists (`build_splits.py`).
+3. Computes simple steric contacts and clashes per structure (`compute_clashes_contacts.py`).
+4. Produces dataset-level plots for:
+   - sequence length (number of residues)
+   - number of chains
+   - number of contacts
+   - number of clashes
+
+The whole process is reproducible with a few command-line calls.
+
+---
+
+### Directory layout
+
+All paths below are relative to the `future_directions/` folder:
+
+```text
+future_directions/
+├── pdb_train/           # raw training PDB files
+├── pdb_test/            # raw test PDB files
+├── pdb_train_clean/     # cleaned training PDBs (created by the pipeline)
+├── scripts/
+│   ├── clean_pdb.py
+│   ├── build_splits.py
+│   ├── compute_clashes_contacts.py
+│   └── plot_basic_stats.py
+├── results/             # CSVs and ID lists
+└── figures/             # PNG plots
+
+

@@ -163,14 +163,12 @@ future_directions/
 │   └── plot_basic_stats.py
 ├── results/             # CSVs and ID lists
 └── figures/             # PNG plots
----
-## 📌 Pipeline Overview
-
-Below is the full processing pipeline used for the dataset.  
-**Paste the pipeline figure here:**
-
-### **Pipeline Diagram**
-Expected plot:
-<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_direction/figures/pipeline.png" />
 
 
+## Requirements
+
+Python 3.8+
+
+Recommended to use a virtual environment.
+
+Install Python dependencies:

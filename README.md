@@ -232,8 +232,8 @@ results/pdb_stats.csv
 
 Each row corresponds to one structure and contains:
 
+<img width="468" height="67" alt="image" src="https://github.com/user-attachments/assets/993ecd38-24e1-46db-bc85-f6bbd0de32c5" />
 
-<img width="2968" height="1767" alt="image" src="Screenshot 2025-12-05 at 23.41.27.png" />
 
 
 ## 4. Generating dataset-level plots
@@ -257,6 +257,7 @@ contacts_distribution.png
 
 clashes_distribution.png
 
+<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_directions/figures/clashes_distribution.png" />
 ## 5. End-to-end reproduction
 
 To regenerate all outputs from scratch (assuming pdb_train/ and pdb_test/ already exist):

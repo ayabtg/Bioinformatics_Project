@@ -156,7 +156,7 @@ The plot helps identify:
 Train the potential:
 
 ```bash
-python scripts/train_potential.py --data-dir data/pdb_train --output-dir output/potentials
+ python TP_RNA/scripts/train_potential.py --data-dir data/pdb_train --output-dir output/potentials
 ```
 
 Score a structure:

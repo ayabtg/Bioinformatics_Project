@@ -56,6 +56,7 @@ Parameter	Description	Default
 --min-sep	Minimum	i-j
 --atom	Atom used for distance computation	"C3'"
 
+
 Example
 bash
 Copier le code
@@ -75,6 +76,7 @@ AC.potential
 AG.potential
 ...
 UU.potential
+
 3️⃣ Scoring an RNA Structure (score_structure.py)
 This script evaluates an RNA structure using the trained potentials and produces a CSV scoring profile.
 

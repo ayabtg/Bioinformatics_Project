@@ -164,4 +164,12 @@ future_directions/
 ├── results/             # CSVs and ID lists
 └── figures/             # PNG plots
 
+## 📌 Pipeline Overview
+
+Below is the full processing pipeline used for the dataset.  
+**Paste the pipeline figure here:**
+
+### **Pipeline Diagram**
+
+![PDB Processing Pipeline](figures/pipeline_diagram.png)
 

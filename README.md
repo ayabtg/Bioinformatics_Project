@@ -1,189 +1,148 @@
-# README.md – TP_RNA Project
+# 📘 User Manual — RNA 3D Scoring Pipeline  
+*(Parameterized Version)*
 
-## Overview
+This document explains how to use the parameterized Python scripts to:
 
-This project implements a small RNA 3D structure analysis pipeline based on the TP instructions.
+1. **Train statistical potentials** from RNA training structures.  
+2. **Score a new RNA structure** using the learned potentials.  
+3. **Customize all parameters** using command-line flags (CLI parametrization).
 
-The goal is to:
+---
 
-- Build a dataset of RNA structures from the Protein Data Bank (PDB)
-- Learn a statistical potential based on C3′–C3′ distances between nucleotides
-- Use this potential to score and evaluate new RNA structures
-- Visualise the resulting per-position pseudo-energy profile
+## 1️⃣ Requirements
 
-This scoring approach is inspired by RNA knowledge-based potentials used in structural biology.
-The pseudo-energy approximates the Gibbs free energy of an RNA conformation.
+Make sure you have:
 
-## Project Structure
+- Python 3 installed  
+- Required libraries (`numpy`, `Bio.PDB`, etc.)  
+- RNA structure files organized as follows:
 
-```
 TP_RNA/
-│
 ├── data/
-│   ├── pdb_train/          # PDB files for training the potential
-│   └── pdb_test/           # PDB files for scoring (RNA-Puzzles, etc.)
-│
-├── output/
-│   ├── potentials/         # 10 base-pair potentials (20 bins each)
-│   ├── profiles/           # scoring profiles (CSV)
-│   └── plots/              # profile plots (PNG/PDF)
-│
+│ ├── pdb_train/ ← PDB files for training
+│ └── pdb_test/ ← PDB files for scoring
 ├── scripts/
-│   ├── train_potential.py  # training script
-│   ├── score_structure.py  # scoring script
-│   └── plot_profiles.R     # plotting script
-│
-└── README.md
-```
+│ ├── train_potential.py
+│ └── score_structure.py
+└── output/
+├── potentials/ ← generated potentials
+└── profiles/ ← generated scoring profiles
 
-## What the project does
+yaml
+Copier le code
 
-### 1. Dataset creation (PDB files)
+---
 
-You must download several RNA-only structures from the RCSB PDB:
+## 2️⃣ Training Potentials (`train_potential.py`)
 
-- only RNA, no DNA, no proteins
-- preferably X-ray structures
-- small hairpins, duplexes, tRNA fragments, etc.
+This script learns statistical pairwise potentials (AA, AC, AG, … UU) from RNA 3D structures.
 
-Place them here:
+### **General Command**
 
-```
-data/pdb_train/   → used to train the potential
-data/pdb_test/    → used to evaluate structures
-```
+```bash
+python3 scripts/train_potential.py \
+    --data-dir <TRAINING_DATA_DIRECTORY> \
+    --output-dir <OUTPUT_DIRECTORY> \
+    [--bins N] \
+    [--cutoff DIST] \
+    [--min-sep S] \
+    [--atom ATOM_NAME]
+Available Parameters
+Parameter	Description	Default
+--data-dir	Directory containing PDB training structures	required
+--output-dir	Where potential files will be saved	required
+--bins	Number of distance bins	20
+--cutoff	Maximum distance (Å)	20
+--min-sep	Minimum	i-j
+--atom	Atom used for distance computation	"C3'"
 
-### 2. Learning the RNA statistical potential (train_potential.py)
+Example
+bash
+Copier le code
+python3 scripts/train_potential.py \
+    --data-dir data/pdb_train \
+    --output-dir output/potentials \
+    --bins 20 \
+    --cutoff 20 \
+    --min-sep 4 \
+    --atom "C3'"
+This creates files such as:
 
-This script follows exactly the TP consignes:
-
-**✔ Extract distances**
-
-- Only C3′ atoms
-- Only intrachain distances
-- Only residue pairs separated by at least 3 positions: (i, i+4), (i, i+5), (i, i+6), …
-- Only distances ≤ 20 Å
-
-**✔ Build 10 base-pair distributions**
-
-For each pair type: AA, AU, AC, AG, UU, UC, UG, CC, CG, GG
-
-Compute a distance histogram with 20 bins between 0 and 20 Å.
-
-**✔ Compute observed frequencies**
-
-```
-f_obs(i,j,r) = N(i,j,r) / N(i,j)
-```
-
-**✔ Compute reference frequency (all bases = "X")**
-
-```
-f_ref(r) = N(X,X,r) / N(X,X)
-```
-
-**✔ Compute pseudo-energy (TP formula)**
-
-```
-ū(i,j,r) = − log( f_obs(i,j,r) / f_ref(r) )
-```
-
-**✔ Output**
-
-The script writes 10 files, one for each base-pair type, each containing 20 values (1 per bin), capped at a maximum value of 10.
-
-Saved to: `output/potentials/`
-
-### 3. Scoring new RNA structures (score_structure.py)
-
-This script evaluates a structure from pdb_test/ using the trained potential.
-
-It repeats the same extraction rules:
-
-- C3′ atoms
-- intrachain
-- residues i and i+4 or more
-- distances ≤ 20 Å
-
-**✔ For each distance:**
-
-- determine base-pair type (AA, AU, …)
-- find the two closest bins
-- use linear interpolation to estimate score
-- sum all scores for each position → per-position profile
-
-**✔ Output:**
-
-```
-output/profiles/<name>.profile.csv
-```
-
-Example:
-
-```
-position,score
-1,-0.23
-2,1.45
-3,0.11
+python-repl
+Copier le code
+AA.potential
+AC.potential
+AG.potential
 ...
-```
+UU.potential
+3️⃣ Scoring an RNA Structure (score_structure.py)
+This script evaluates an RNA structure using the trained potentials and produces a CSV scoring profile.
 
-You should also compute: the total pseudo-energy of the structure
+General Command
+bash
+Copier le code
+python3 scripts/score_structure.py \
+    --input-pdb <PDB_FILE_TO_SCORE> \
+    --potentials-dir <POTENTIALS_DIRECTORY> \
+    --output-csv <OUTPUT_CSV_FILE> \
+    [--cutoff DIST] \
+    [--min-sep S] \
+    [--atom ATOM_NAME]
+Parameters
+Parameter	Description	Default
+--input-pdb	Structure to score	required
+--potentials-dir	Directory containing .potential files	required
+--output-csv	Output CSV path	required
+--cutoff	Maximum atom-atom distance	20
+--min-sep	Minimum	i-j
+--atom	Atom to analyze	"C3'"
 
-### 4. Plotting the profiles (plot_profiles.R)
+Example
+bash
+Copier le code
+python3 scripts/score_structure.py \
+    --input-pdb data/pdb_test/1EHZ.pdb \
+    --potentials-dir output/potentials \
+    --output-csv output/profiles/1EHZ_profile.csv \
+    --cutoff 20 \
+    --min-sep 4 \
+    --atom "C3'"
+Output file:
 
-This script uses R + ggplot2 to produce scoring profile plots.
+bash
+Copier le code
+output/profiles/1EHZ_profile.csv
+The CSV contains, for each nucleotide:
 
-**Input:**
+residue index
 
-```
-output/profiles/<name>.profile.csv
-```
+residue type (A, U, G, C)
 
-**Output:**
+total interaction score
 
-```
-output/plots/<name>.png
-```
+individual contributions
 
-The plot helps identify:
+4️⃣ Notes & Best Practices
+✔️ Changing atoms
+The scoring behavior changes depending on which atom is chosen ("C3'", "C4'", "P"…).
 
-- Low-energy regions → good / native-like
-- High-energy regions → unusual / possibly misfolded
+✔️ No need to modify the code
+All behavior is controlled through CLI flags — this is the purpose of parametrization.
 
-##  How to run the project
+✔️ Reproducibility
+Each run documents its own parameters, making comparisons straightforward.
 
-Train the potential:
-
-```bash
-python scripts/train_potential.py --data-dir data/pdb_train --output-dir output/potentials
-```
-
-Score a structure:
-
-```bash
-python scripts/score_structure.py data/pdb_test/<name>.pdb output/profiles/<name>.profile.csv
-```
-
-Plot the profile:
-
-```bash
-Rscript scripts/plot_profiles.R output/profiles/<name>.profile.csv output/plots/<name>.png
-```
-
-##  Requirements
-
-- Python 3
-- R + ggplot2
-- Recommended Python packages:
-  - numpy
-  - pandas
-  - biopython (optional, for easier PDB parsing)
-
-## Quick usage
-
-- Put training PDBs in `data/pdb_train/`
-- Put test PDBs in `data/pdb_test/`
-- Run `train_potential.py` to compute potentials
-- Run `score_structure.py` to evaluate a structure
-- Run `plot_profiles.R` to visualise the profile
+5️⃣ Quick Reference (Cheat Sheet)
+Train:
+bash
+Copier le code
+python3 scripts/train_potential.py \
+    --data-dir data/pdb_train \
+    --output-dir output/potentials
+Score:
+bash
+Copier le code
+python3 scripts/score_structure.py \
+    --input-pdb data/pdb_test/1XYZ.pdb \
+    --potentials-dir output/potentials \
+    --output-csv output/profiles/1XYZ_profile.csv

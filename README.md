@@ -62,7 +62,7 @@ If this file is created successfully, the scoring system is working correctly.
 
 1. Training Data:
    
-Training RNA structures must be placed in:
+Training RNA structures (.pdb format) must be placed in:
 ```
 TP_RNA/data/pdb_train/
 ```
@@ -88,7 +88,7 @@ These files represent trained distance-based statistical energy potentials.
 # Step 3 — Scoring New RNA Structures
 1. Input Data:
    
-Place any RNA structures to be scored in:
+Place any RNA structures (.pdb format) to be placed in:
 ```
 TP_RNA/data/pdb_set/
 ```

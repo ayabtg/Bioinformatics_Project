@@ -1,0 +1,9 @@
+pdb_id,split,length,chains,contacts,clashes
+157D,train,121,2,5054,570
+17RA,train,21,1,403660,68674
+1A3M,train,27,2,1744151,349561
+1A4D,train,41,2,7909,984
+1AFX,train,12,1,383211,69237
+1AJF,train,19,1,3455,437
+1EHZ,test,245,1,16355,1855
+2K96,test,47,1,3432439,634635

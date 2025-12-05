@@ -1,23 +1,16 @@
 #!/usr/bin/env python3
-"""
-Plotting script for RNA statistical potential visualization.
-"""
-
+#Plotting script for RNA statistical potential visualization.
 import matplotlib
 matplotlib.use("Agg")  # MUST be before pyplot import
-
 import os
 import sys
 import argparse
 from typing import Dict, List, Tuple
-
 import numpy as np
 import matplotlib.pyplot as plt
 
+#Argument parsing
 
-# --------------------------------------------------------------
-# Argument parsing
-# --------------------------------------------------------------
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -37,10 +30,7 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-
-# --------------------------------------------------------------
 # Load potential data
-# --------------------------------------------------------------
 def load_potential(filepath: str) -> Tuple[List[float], List[float]]:
     """Read one .potential file (distance, score)."""
     distances = []
@@ -79,10 +69,7 @@ def load_all_potentials(potentials_dir: str) -> Dict[str, Tuple[List[float], Lis
 
     return potentials
 
-
-# --------------------------------------------------------------
 # Plot potential curve
-# --------------------------------------------------------------
 def plot_potential_curve(base_pair, distances, scores, output_path):
     distances = np.array(distances)
     scores = np.array(scores)
@@ -122,10 +109,7 @@ def plot_potential_curve(base_pair, distances, scores, output_path):
 
     print(f"[INFO] Saved potential plot → {output_path}")
 
-
-# --------------------------------------------------------------
 # Main
-# --------------------------------------------------------------
 def main():
     args = parse_args()
 

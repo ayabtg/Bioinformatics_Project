@@ -232,9 +232,7 @@ results/pdb_stats.csv
 
 Each row corresponds to one structure and contains:
 
-<img width="468" height="67" alt="image" src="https://github.com/user-attachments/assets/993ecd38-24e1-46db-bc85-f6bbd0de32c5" />
-
-
+<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_directions/figures/Screenshot%202025-12-05%20at%2023.41.27.png" />
 
 ## 4. Generating dataset-level plots
 

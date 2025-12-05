@@ -18,14 +18,23 @@ Make sure you have:
 - RNA structure files organized as follows:
 
 TP_RNA/
-├── data/
+
+├── data
+
 │ ├── pdb_train/ ← PDB files for training
+
 │ └── pdb_test/ ← PDB files for scoring
+
 ├── scripts/
+
 │ ├── train_potential.py
+
 │ └── score_structure.py
+
 └── output/
+
 ├── potentials/ ← generated potentials
+
 └── profiles/ ← generated scoring profiles
 
 
@@ -42,7 +51,9 @@ python3 scripts/train_potential.py \
     [--cutoff DIST] \
     [--min-sep S] \
     [--atom ATOM_NAME]
+    
 Available Parameters
+
 Parameter	Description	Default
 --data-dir	Directory containing PDB training structures	required
 --output-dir	Where potential files will be saved	required
@@ -62,6 +73,7 @@ python3 scripts/train_potential.py \
     --cutoff 20 \
     --min-sep 4 \
     --atom "C3'"
+    
 This creates files such as:
 
 python-repl
@@ -86,6 +98,7 @@ python3 scripts/score_structure.py \
     [--atom ATOM_NAME]
     
 Parameters
+
 Parameter	Description	Default
 --input-pdb	Structure to score	required
 --potentials-dir	Directory containing .potential files	required
@@ -95,6 +108,7 @@ Parameter	Description	Default
 --atom	Atom to analyze	"C3'"
 
 Example
+
 python3 scripts/score_structure.py \
     --input-pdb data/pdb_test/1EHZ.pdb \
     --potentials-dir output/potentials \
@@ -102,8 +116,8 @@ python3 scripts/score_structure.py \
     --cutoff 20 \
     --min-sep 4 \
     --atom "C3'"
+    
 Output file:
-
 bash
 output/profiles/1EHZ_profile.csv
 The CSV contains, for each nucleotide:
@@ -117,6 +131,7 @@ total interaction score
 individual contributions
 
 ## 4️⃣ Notes & Best Practices
+
 ✔️ Changing atoms
 The scoring behavior changes depending on which atom is chosen ("C3'", "C4'", "P"…).
 
@@ -129,6 +144,7 @@ Each run documents its own parameters, making comparisons straightforward.
 ## 5️⃣ Quick Reference (Cheat Sheet)
 
 Train:
+
 bash
 python3 scripts/train_potential.py \
     --data-dir data/pdb_train \

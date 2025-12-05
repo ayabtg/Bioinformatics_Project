@@ -171,5 +171,5 @@ Below is the full processing pipeline used for the dataset.
 
 ### **Pipeline Diagram**
 
-![PDB Processing Pipeline](figures/pipeline_diagram.png)
+![PDB Processing Pipeline](figures/pipeline.png)
 

@@ -122,3 +122,7 @@ Each plot shows:
 X-axis: Distance (Å)
 
 Y-axis: Statistical Energy
+
+Expected plot:
+<img width="2968" height="1767" alt="image" src="https://github.com/user-attachments/assets/483c0998-e653-4ff4-825d-7e60d96ae1c2" />
+

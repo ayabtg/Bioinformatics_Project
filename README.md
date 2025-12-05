@@ -72,7 +72,7 @@ AG.potential
 ...
 UU.potential
 
-3️⃣ Scoring an RNA Structure (score_structure.py)
+## 3️⃣ Scoring an RNA Structure (score_structure.py)
 This script evaluates an RNA structure using the trained potentials and produces a CSV scoring profile.
 
 General Command
@@ -85,6 +85,7 @@ python3 scripts/score_structure.py \
     [--cutoff DIST] \
     [--min-sep S] \
     [--atom ATOM_NAME]
+    
 Parameters
 Parameter	Description	Default
 --input-pdb	Structure to score	required
@@ -96,7 +97,6 @@ Parameter	Description	Default
 
 Example
 bash
-Copier le code
 python3 scripts/score_structure.py \
     --input-pdb data/pdb_test/1EHZ.pdb \
     --potentials-dir output/potentials \
@@ -119,7 +119,7 @@ total interaction score
 
 individual contributions
 
-4️⃣ Notes & Best Practices
+## 4️⃣ Notes & Best Practices
 ✔️ Changing atoms
 The scoring behavior changes depending on which atom is chosen ("C3'", "C4'", "P"…).
 
@@ -129,7 +129,7 @@ All behavior is controlled through CLI flags — this is the purpose of parametr
 ✔️ Reproducibility
 Each run documents its own parameters, making comparisons straightforward.
 
-5️⃣ Quick Reference (Cheat Sheet)
+## 5️⃣ Quick Reference (Cheat Sheet)
 Train:
 bash
 Copier le code
@@ -137,8 +137,8 @@ python3 scripts/train_potential.py \
     --data-dir data/pdb_train \
     --output-dir output/potentials
 Score:
+
 bash
-Copier le code
 python3 scripts/score_structure.py \
     --input-pdb data/pdb_test/1XYZ.pdb \
     --potentials-dir output/potentials \

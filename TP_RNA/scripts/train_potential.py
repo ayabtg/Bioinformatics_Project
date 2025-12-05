@@ -33,7 +33,6 @@ SORTED_PAIR_TO_CANONICAL = {
 }
 
 
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train RNA statistical potential.")
 
@@ -73,8 +72,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-score", "-ms", type=float, default=10.0)
 
     return parser.parse_args()
-
-
 
 def collect_pdb_paths(inputs: List[str]) -> List[str]:
     """Collect all PDB / CIF / ENT files from the given paths."""
@@ -136,7 +133,6 @@ def canonical_pair(r1: str, r2: str) -> str:
     return SORTED_PAIR_TO_CANONICAL.get(pair, "")
 
 
-
 def update_distance_counts(
     c3_atoms,
     observed_counts,
@@ -174,8 +170,6 @@ def update_distance_counts(
                 observed_counts[pair][bin_id] += 1
 
             reference_counts[bin_id] += 1
-
-
 
 def compute_frequency(counts, pseudo: float = 1e-12):
     """Convert raw counts to frequencies with a small pseudocount."""
@@ -253,9 +247,7 @@ def save_scores(scores, distance_bins, out_dir: str):
 
         print(f"[INFO] Wrote {path}")
 
-# ----------------------------------------------------------------------
 # Main execution
-# ----------------------------------------------------------------------
 
 def main():
     args = parse_args()
@@ -311,9 +303,9 @@ def main():
         args.max_score,
     )
 
-    # Save potentials to files
     save_scores(scores, distance_bins, args.out_dir)
 
 
 if __name__ == "__main__":
+
     main()

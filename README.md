@@ -28,10 +28,6 @@ TP_RNA/
 ├── potentials/ ← generated potentials
 └── profiles/ ← generated scoring profiles
 
-yaml
-Copier le code
-
----
 
 ## 2️⃣ Training Potentials (`train_potential.py`)
 
@@ -39,7 +35,6 @@ This script learns statistical pairwise potentials (AA, AC, AG, … UU) from RNA
 
 ### **General Command**
 
-```bash
 python3 scripts/train_potential.py \
     --data-dir <TRAINING_DATA_DIRECTORY> \
     --output-dir <OUTPUT_DIRECTORY> \

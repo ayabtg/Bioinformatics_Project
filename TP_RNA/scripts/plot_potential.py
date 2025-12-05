@@ -15,6 +15,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+# --------------------------------------------------------------
+# Argument parsing
+# --------------------------------------------------------------
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -24,7 +27,7 @@ def parse_args() -> argparse.Namespace:
         "--potentials-dir", "-p",
         type=str,
         default="data/potentials",
-        help="Directory containing potential files (*.txt). Default: data/potentials"
+        help="Directory containing *.potential files. Default: data/potentials"
     )
     parser.add_argument(
         "--output-dir", "-o",
@@ -39,6 +42,7 @@ def parse_args() -> argparse.Namespace:
 # Load potential data
 # --------------------------------------------------------------
 def load_potential(filepath: str) -> Tuple[List[float], List[float]]:
+    """Read one .potential file (distance, score)."""
     distances = []
     scores = []
     with open(filepath, 'r') as f:
@@ -58,13 +62,14 @@ def load_potential(filepath: str) -> Tuple[List[float], List[float]]:
 
 
 def load_all_potentials(potentials_dir: str) -> Dict[str, Tuple[List[float], List[float]]]:
+    """Load all base-pair potential files into memory."""
     potentials = {}
 
     for filename in sorted(os.listdir(potentials_dir)):
-        if not filename.endswith(".txt"):
+        if not filename.endswith(".potential"):       # <-- FIXED
             continue
 
-        bp = filename.replace(".txt", "")
+        bp = filename.replace(".potential", "")       # <-- FIXED
         path = os.path.join(potentials_dir, filename)
 
         distances, scores = load_potential(path)
@@ -76,7 +81,7 @@ def load_all_potentials(potentials_dir: str) -> Dict[str, Tuple[List[float], Lis
 
 
 # --------------------------------------------------------------
-# Plot potential curve ONLY
+# Plot potential curve
 # --------------------------------------------------------------
 def plot_potential_curve(base_pair, distances, scores, output_path):
     distances = np.array(distances)
@@ -87,13 +92,21 @@ def plot_potential_curve(base_pair, distances, scores, output_path):
     # Line plot
     plt.plot(distances, scores, 'o-', linewidth=2, label=f"{base_pair} potential")
 
-    # Favorable < 0 → green
-    plt.fill_between(distances, scores, 0, where=(scores < 0),
-                     color='green', alpha=0.3, label='Favorable (<0)')
+    # Favorable region (scores < 0)
+    plt.fill_between(
+        distances, scores, 0,
+        where=(scores < 0),
+        color='green', alpha=0.3,
+        label='Favorable (<0)'
+    )
 
-    # Unfavorable > 0 → red
-    plt.fill_between(distances, scores, 0, where=(scores > 0),
-                     color='red', alpha=0.3, label='Unfavorable (>0)')
+    # Unfavorable region (scores > 0)
+    plt.fill_between(
+        distances, scores, 0,
+        where=(scores > 0),
+        color='red', alpha=0.3,
+        label='Unfavorable (>0)'
+    )
 
     plt.axhline(0, color='black', linewidth=1)
 
@@ -122,7 +135,7 @@ def main():
     potentials = load_all_potentials(args.potentials_dir)
 
     if not potentials:
-        print("[ERROR] No potential files found!", file=sys.stderr)
+        print("[ERROR] No .potential files found!", file=sys.stderr)
         sys.exit(1)
 
     print("\n[INFO] Generating potential plots...")

@@ -169,7 +169,7 @@ python TP_RNA/scripts/score_structure.py data/pdb_test/ output/profiles/ --pot-d
 Plot the profile:
 
 ```bash
- python TP_RNA/scripts/plot_potential.py     --potentials-dir TP_RNA/output/potentials     --output-dir TP_RNA/output/plots
+ python TP_RNA/scripts/score_structure.py TP_RNA/data/pdb_test     --potentials-dir TP_RNA/output/potentials     --csv-output TP_RNA/output/profiles/scores.csv
 
 ```
 

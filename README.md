@@ -165,7 +165,7 @@ future_directions/
 └── figures/             # PNG plots
 ```
 Pipeline Overview:
-<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_direction/figures/pipeline.png" />
+<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_directions/figures/pipeline.png" />
 
 We implemented an end-to-end pipeline that (i) cleans and validates the raw RNA PDB structures, (ii) computes steric clashes and residue–residue contacts on the cleaned models, (iii) builds explicit train/test lists, and (iv) generates dataset-level statistics and figures (length, chain count, clash density, contact density).
 
@@ -233,7 +233,7 @@ results/pdb_stats.csv
 Each row corresponds to one structure and contains:
 
 
-<img width="2968" height="1767" alt="image" src="https://github.com/ayabtg/Bioinformatics_Project/blob/main/future_direction/figures/Screenshot%202025-12-05%20at%2023.41.27.png" />
+<img width="2968" height="1767" alt="image" src="Screenshot 2025-12-05 at 23.41.27.png" />
 
 
 ## 4. Generating dataset-level plots

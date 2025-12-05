@@ -1,155 +1,329 @@
 #!/usr/bin/env python3
 import os
+import sys
 import argparse
+from math import log
+from typing import List
+
 import numpy as np
-from Bio.PDB import PDBParser
+from Bio import PDB
 
-# Base pairs to consider (unordered)
-BASE_PAIRS = [
-    "AA","AU","AC","AG",
-    "UU","UC","UG",
-    "CC","CG",
-    "GG"
-]
+# ----------------------------------------------------------------------
+# Constants
+# ----------------------------------------------------------------------
 
-def get_base_pair(a, b):
-    """Return unordered base pair type."""
-    pair = "".join(sorted([a, b]))
-    return pair if pair in BASE_PAIRS else None
+BASE_PAIRS = ['AA', 'AU', 'AC', 'AG', 'UU', 'UC', 'UG', 'CC', 'CG', 'GG']
+
+RESIDUE_NAME_MAP = {
+    'A': 'A', 'ADE': 'A', 'DA': 'A',
+    'C': 'C', 'CYT': 'C', 'DC': 'C',
+    'G': 'G', 'GUA': 'G', 'DG': 'G',
+    'U': 'U', 'URA': 'U', 'DU': 'U'
+}
+
+SORTED_PAIR_TO_CANONICAL = {
+    'AA': 'AA',
+    'AC': 'AC',
+    'AG': 'AG',
+    'AU': 'AU',
+    'CC': 'CC',
+    'CG': 'CG',
+    'CU': 'UC',
+    'GG': 'GG',
+    'GU': 'UG',
+    'UU': 'UU',
+}
+
+# ----------------------------------------------------------------------
+# Argument parsing
+# ----------------------------------------------------------------------
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Train RNA statistical potential.")
+
+    parser.add_argument(
+        "inputs",
+        nargs="+",
+        help="PDB/MMCIF files or directories containing PDB/MMCIF files."
+    )
+
+    parser.add_argument(
+        "--out-dir", "-o",
+        default="potentials",
+        help="Output directory (default: potentials)."
+    )
+
+    parser.add_argument("--round-decimals", "-r", type=int, default=3)
+    parser.add_argument("--min-distance", "-mind", type=float, default=2.0)
+
+    parser.add_argument(
+        "--atom-type", "-a",
+        type=str,
+        default="C3'",
+        help="Atom type to use (default: C3')."
+    )
+
+    parser.add_argument(
+        "--density-method", "-dm",
+        type=str,
+        choices=["histogram", "kde"],
+        default="histogram"
+    )
+
+    parser.add_argument("--kde-bandwidth", "-kbw", type=float, default=0.5)
+    parser.add_argument("--max-distance", "-maxd", type=float, default=20.0)
+    parser.add_argument("--min-seq-sep", "-s", type=int, default=4)
+    parser.add_argument("--bin-width", "-w", type=float, default=1.0)
+    parser.add_argument("--max-score", "-ms", type=float, default=10.0)
+
+    return parser.parse_args()
+
+# ----------------------------------------------------------------------
+# Utilities
+# ----------------------------------------------------------------------
+
+def collect_pdb_paths(inputs: List[str]) -> List[str]:
+    """Collect all PDB / CIF / ENT files from the given paths."""
+    pdb_paths = []
+    for path in inputs:
+        if os.path.isdir(path):
+            for name in os.listdir(path):
+                full = os.path.join(path, name)
+                if (
+                    os.path.isfile(full)
+                    and (
+                        name.lower().endswith(".pdb")
+                        or name.lower().endswith(".cif")
+                        or name.lower().endswith(".ent")
+                    )
+                ):
+                    pdb_paths.append(full)
+        elif os.path.isfile(path):
+            pdb_paths.append(path)
+        else:
+            print(f"[WARN] Invalid path: {path}", file=sys.stderr)
+    return sorted(set(pdb_paths))
 
 
-def extract_atoms(structure, atom_name="C3'"):
+def calculate_ED(a1, a2) -> float:
+    """Euclidean distance between two atoms."""
+    return float(np.linalg.norm(a1.coord - a2.coord))
+
+
+def extract_c3_atoms(chain, atom_type: str = "C3'"):
     """
-    Extract atoms as (res_index, chain_id, base, atom_object).
-    Keeps only altLoc 'A' or ' '.
+    Extract list of (seq_index, atom, base, bfactor) for residues
+    that contain the requested atom.
     """
-    atoms = []
-    for model in structure:
-        for chain in model:
-            for res in chain:
+    atoms_list = []
+    residues = list(chain)
 
-                if atom_name not in res:
-                    continue
+    for i, residue in enumerate(residues):
+        name = residue.resname.strip()
+        base = RESIDUE_NAME_MAP.get(name, "")
 
-                atom = res[atom_name]
-
-                # altLoc filtering
-                if atom.get_altloc() not in (" ", "A"):
-                    continue
-
-                idx = res.get_id()[1]
-                base = res.resname.strip()[0]   # A/U/C/G
-                chain_id = chain.id
-
-                atoms.append((idx, chain_id, base, atom))
-        break  # model 0 only
-    return atoms
-
-
-def save_potentials_with_bin_centers(potentials, bin_edges, out_dir):
-    """
-    Save potentials as 2-column files:
-    Distance(Å)   Score
-    """
-    os.makedirs(out_dir, exist_ok=True)
-
-    # bin centers (e.g. 0.5, 1.5, 2.5…)
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.0
-
-    for bp, scores in potentials.items():
-        out_path = os.path.join(out_dir, f"{bp}.potential")
-
-        with open(out_path, "w") as f:
-            f.write("# Distance(Å) Score\n")
-            for d, s in zip(bin_centers, scores):
-                f.write(f"{d:.3f} {s:.5f}\n")
-
-        print(f"[INFO] Wrote {out_path}")
-
-
-def compute_potentials(data_dir, output_dir, bin_width=1.0, cutoff=20.0, min_sep=4, atom_name="C3'"):
-    """Compute knowledge-based potentials."""
-
-    # Create distance bins 0–cutoff with step=bin_width
-    bin_edges = np.arange(0, cutoff + bin_width, bin_width)
-    n_bins = len(bin_edges) - 1
-
-    # Initialize counters
-    counts = {bp: np.zeros(n_bins) for bp in BASE_PAIRS}
-    ref_counts = np.zeros(n_bins)
-
-    parser = PDBParser(QUIET=True)
-
-    for pdb_file in os.listdir(data_dir):
-        if not pdb_file.endswith(".pdb"):
+        if not base:
             continue
 
-        structure = parser.get_structure("rna", os.path.join(data_dir, pdb_file))
-        atoms = extract_atoms(structure, atom_name)
+        try:
+            atom = residue[atom_type]
+        except KeyError:
+            continue
 
-        for i in range(len(atoms)):
-            idx1, chain1, base1, atom1 = atoms[i]
+        bfactor = atom.get_bfactor()
+        atoms_list.append((i, atom, base, bfactor))
 
-            for j in range(i + min_sep, len(atoms)):
-                idx2, chain2, base2, atom2 = atoms[j]
+    return atoms_list
 
-                # Intrachain only
-                if chain1 != chain2:
-                    continue
 
-                # Euclidean distance
-                dist = np.linalg.norm(atom1.coord - atom2.coord)
+def canonical_pair(r1: str, r2: str) -> str:
+    """Return canonical base-pair name (unordered, mapped to our set)."""
+    pair = ''.join(sorted((r1, r2)))
+    return SORTED_PAIR_TO_CANONICAL.get(pair, "")
 
-                if dist <= 0 or dist > cutoff:
-                    continue
+# ----------------------------------------------------------------------
+# Distance accumulation
+# ----------------------------------------------------------------------
 
-                # assign to bin
-                bin_id = np.searchsorted(bin_edges, dist) - 1
-                if bin_id < 0 or bin_id >= n_bins:
-                    continue
+def update_distance_counts(
+    c3_atoms,
+    observed_counts,
+    reference_counts,
+    distance_bins,
+    min_distance,
+    max_distance,
+    min_seq_sep
+):
+    n = len(c3_atoms)
+    n_bins = len(distance_bins) - 1
 
-                bp = get_base_pair(base1, base2)
+    for i in range(n):
+        seq1, atom1, res1, bf1 = c3_atoms[i]
+        for j in range(i + 1, n):
+            seq2, atom2, res2, bf2 = c3_atoms[j]
 
-                ref_counts[bin_id] += 1
-                if bp:
-                    counts[bp][bin_id] += 1
+            # Skip pairs too close along the sequence
+            if seq2 - seq1 < min_seq_sep:
+                continue
+
+            dist = calculate_ED(atom1, atom2)
+
+            if dist < min_distance:
+                continue
+            if dist >= max_distance:
+                continue
+
+            bin_id = int(np.searchsorted(distance_bins, dist) - 1)
+            if not (0 <= bin_id < n_bins):
+                continue
+
+            pair = canonical_pair(res1, res2)
+            if pair in observed_counts:
+                observed_counts[pair][bin_id] += 1
+
+            reference_counts[bin_id] += 1
+
+# ----------------------------------------------------------------------
+# Scoring
+# ----------------------------------------------------------------------
+
+def compute_frequency(counts, pseudo: float = 1e-12):
+    """Convert raw counts to frequencies with a small pseudocount."""
+    total = counts.sum()
+    if total <= 0:
+        return None
+    freq = counts / total
+    return np.clip(freq, pseudo, None)
+
+
+def compute_single_score(f_obs: float, f_ref: float, max_score: float) -> float:
+    """Single-bin potential score using -log(f_obs/f_ref)."""
+    if f_obs > 0 and f_ref > 0:
+        return min(-log(f_obs / f_ref), max_score)
+    return max_score
+
+
+def compute_scores(
+    observed_counts,
+    reference_counts,
+    n_bins,
+    round_decimals,
+    distance_bins,
+    min_distance,
+    max_score
+):
+    """Compute statistical potential scores for each base pair and distance bin."""
+    scores = {}
+    centers = (distance_bins[:-1] + distance_bins[1:]) / 2.0
+
+    f_ref = compute_frequency(reference_counts)
+    if f_ref is None:
+        f_ref = np.ones(n_bins) / n_bins
+
+    for bp, counts in observed_counts.items():
+        f_obs = compute_frequency(counts)
+        if f_obs is None:
+            scores[bp] = [max_score] * n_bins
+            continue
+
+        bp_scores = []
+        for r in range(n_bins):
+            if centers[r] < min_distance:
+                bp_scores.append(round(max_score, round_decimals))
+            elif reference_counts[r] == 0:
+                bp_scores.append(round(max_score, round_decimals))
+            else:
+                val = compute_single_score(f_obs[r], f_ref[r], max_score)
+                bp_scores.append(round(val, round_decimals))
+
+        scores[bp] = bp_scores
+
+    return scores
+
+
+def save_scores(scores, distance_bins, out_dir: str):
+    """
+    Save one file per base pair in the format:
+
+    # Distance(Å)  Score
+    0.5  10.0
+    1.5  9.3
+    ...
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    centers = (distance_bins[:-1] + distance_bins[1:]) / 2.0
+
+    for bp, arr in scores.items():
+        path = os.path.join(out_dir, f"{bp}.potential")
+
+        with open(path, "w") as f:
+            f.write("# Distance(Å)  Score\n")
+            for d, s in zip(centers, arr):
+                f.write(f"{d:.1f}  {s}\n")
+
+        print(f"[INFO] Wrote {path}")
+
+# ----------------------------------------------------------------------
+# Main execution
+# ----------------------------------------------------------------------
+
+def main():
+    args = parse_args()
+
+    pdb_paths = collect_pdb_paths(args.inputs)
+    if not pdb_paths:
+        print("[ERROR] No PDB files found.")
+        sys.exit(1)
+
+    # Define distance bins
+    num_bins = int(args.max_distance / args.bin_width) + 1
+    distance_bins = np.linspace(0, args.max_distance, num_bins)
+    n_bins = len(distance_bins) - 1
+
+    # Initialize counts
+    observed_counts = {bp: np.zeros(n_bins, dtype=int) for bp in BASE_PAIRS}
+    reference_counts = np.zeros(n_bins, dtype=int)
+
+    PDBparser = PDB.PDBParser(QUIET=True)
+    CIFparser = PDB.MMCIFParser(QUIET=True)
+
+    # Loop over all structures and accumulate distances
+    for pdb_path in pdb_paths:
+        if pdb_path.lower().endswith(".cif"):
+            parser = CIFparser
+        else:
+            parser = PDBparser
+
+        structure = parser.get_structure("RNA", pdb_path)
+
+        for model in structure:
+            for chain in model:
+                atoms = extract_c3_atoms(chain, args.atom_type)
+                if atoms:
+                    update_distance_counts(
+                        atoms,
+                        observed_counts,
+                        reference_counts,
+                        distance_bins,
+                        args.min_distance,
+                        args.max_distance,
+                        args.min_seq_sep,
+                    )
 
     # Compute potentials
-    potentials = {}
-    for bp in BASE_PAIRS:
-        obs = counts[bp] / (np.sum(counts[bp]) + 1e-8)
-        ref = ref_counts / (np.sum(ref_counts) + 1e-8)
+    scores = compute_scores(
+        observed_counts,
+        reference_counts,
+        n_bins,
+        args.round_decimals,
+        distance_bins,
+        args.min_distance,
+        args.max_score,
+    )
 
-        pot = -np.log((obs + 1e-8) / (ref + 1e-8))
-        pot = np.clip(pot, -10, 10)
-
-        potentials[bp] = pot
-
-    # Save using bin centers
-    save_potentials_with_bin_centers(potentials, bin_edges, output_dir)
-
+    # Save potentials to files
+    save_scores(scores, distance_bins, args.out_dir)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Train RNA knowledge-based potentials from PDB structures."
-    )
-
-    parser.add_argument("--data-dir", required=True, help="Folder containing training PDB files.")
-    parser.add_argument("--output-dir", required=True, help="Folder where potentials will be saved.")
-    parser.add_argument("--bin-width", type=float, default=1.0, help="Bin width in Å (default = 1.0).")
-    parser.add_argument("--cutoff", type=float, default=20.0, help="Maximum distance in Å (default = 20).")
-    parser.add_argument("--min-sep", type=int, default=4, help="Minimum |i-j| separation (default = 4).")
-    parser.add_argument("--atom", type=str, default="C3'", help="Atom used for distance (default = C3').")
-
-    args = parser.parse_args()
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    compute_potentials(
-        data_dir=args.data_dir,
-        output_dir=args.output_dir,
-        bin_width=args.bin_width,
-        cutoff=args.cutoff,
-        min_sep=args.min_sep,
-        atom_name=args.atom,
-    )
+    main()

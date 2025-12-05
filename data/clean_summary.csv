@@ -1,9 +1,0 @@
-pdb_id,split,n_chains,total_length,n_residues_missing_backbone,valid,reason
-157D,train,2,24,2,0,missing_backbone_atoms
-17RA,train,12,252,12,0,missing_backbone_atoms
-1A3M,train,40,540,0,1,
-1A4D,train,2,41,1,0,missing_backbone_atoms
-1AFX,train,13,156,13,0,missing_backbone_atoms
-1AJF,train,1,18,1,0,missing_backbone_atoms
-1EHZ,test,1,62,0,1,
-2K96,test,20,940,20,0,missing_backbone_atoms

@@ -8,9 +8,7 @@ from typing import List
 import numpy as np
 from Bio import PDB
 
-# ----------------------------------------------------------------------
-# Constants
-# ----------------------------------------------------------------------
+
 
 BASE_PAIRS = ['AA', 'AU', 'AC', 'AG', 'UU', 'UC', 'UG', 'CC', 'CG', 'GG']
 
@@ -34,9 +32,7 @@ SORTED_PAIR_TO_CANONICAL = {
     'UU': 'UU',
 }
 
-# ----------------------------------------------------------------------
-# Argument parsing
-# ----------------------------------------------------------------------
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train RNA statistical potential.")
@@ -78,9 +74,7 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
-# ----------------------------------------------------------------------
-# Utilities
-# ----------------------------------------------------------------------
+
 
 def collect_pdb_paths(inputs: List[str]) -> List[str]:
     """Collect all PDB / CIF / ENT files from the given paths."""
@@ -141,9 +135,7 @@ def canonical_pair(r1: str, r2: str) -> str:
     pair = ''.join(sorted((r1, r2)))
     return SORTED_PAIR_TO_CANONICAL.get(pair, "")
 
-# ----------------------------------------------------------------------
-# Distance accumulation
-# ----------------------------------------------------------------------
+
 
 def update_distance_counts(
     c3_atoms,
@@ -183,9 +175,7 @@ def update_distance_counts(
 
             reference_counts[bin_id] += 1
 
-# ----------------------------------------------------------------------
-# Scoring
-# ----------------------------------------------------------------------
+
 
 def compute_frequency(counts, pseudo: float = 1e-12):
     """Convert raw counts to frequencies with a small pseudocount."""
@@ -254,7 +244,7 @@ def save_scores(scores, distance_bins, out_dir: str):
     centers = (distance_bins[:-1] + distance_bins[1:]) / 2.0
 
     for bp, arr in scores.items():
-        path = os.path.join(out_dir, f"{bp}.potential")
+        path = os.path.join(out_dir, f"{bp}.txt")
 
         with open(path, "w") as f:
             f.write("# Distance(Å)  Score\n")

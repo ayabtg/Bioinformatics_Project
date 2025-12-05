@@ -66,10 +66,10 @@ def load_all_potentials(potentials_dir: str) -> Dict[str, Tuple[List[float], Lis
     potentials = {}
 
     for filename in sorted(os.listdir(potentials_dir)):
-        if not filename.endswith(".potential"):       # <-- FIXED
+        if not filename.endswith(".txt"):       # <-- FIXED
             continue
 
-        bp = filename.replace(".potential", "")       # <-- FIXED
+        bp = filename.replace(".txt", "")       # <-- FIXED
         path = os.path.join(potentials_dir, filename)
 
         distances, scores = load_potential(path)

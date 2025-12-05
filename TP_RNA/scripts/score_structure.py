@@ -1,150 +1,216 @@
 #!/usr/bin/env python3
+"""
+Score RNA structures using trained distance-based potentials (.potential format).
+Fully compatible with the updated training and plotting scripts.
+"""
+
 import os
+import sys
 import argparse
 import numpy as np
-from Bio.PDB import PDBParser
+from Bio import PDB
 
-# Base pairs considered in the potential files
-BASE_PAIRS = ["AA","AU","AC","AG","UU","UC","UG","CC","CG","GG"]
 
-def get_base_pair(a, b):
-    """Return base-pair type (unordered)."""
-    pair = "".join(sorted([a, b]))
-    return pair if pair in BASE_PAIRS else None
+# ----------------------------------------------------------------------
+# FIX: allow importing modules from TP_RNA/scripts
+# ----------------------------------------------------------------------
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(PROJECT_ROOT)
 
-def extract_atoms(structure, atom_name):
-    """
-    Extract atoms as (res_index, chain_id, base, atom_obj).
-    Includes altLoc filtering (keeps altLoc ' ' and 'A').
-    """
-    atoms = []
-    for model in structure:
-        for chain in model:
-            for res in chain:
+from scripts.train_potential import BASE_PAIRS, SORTED_PAIR_TO_CANONICAL
+from scripts.plot_potential import load_all_potentials   # now reads .potential files
 
-                if atom_name not in res:
-                    continue
 
-                atom = res[atom_name]
-
-                # Filter alternative atom positions
-                if atom.get_altloc() not in (" ", "A"):
-                    continue
-
-                idx = res.get_id()[1]
-                base = res.resname.strip()[0]
-                chain_id = chain.id
-
-                atoms.append((idx, chain_id, base, atom))
-        break  # only first model
-    return atoms
-
-def linear_interpolate(value, table):
-    """
-    Interpolate score from potential table for a distance value.
-    """
-    bin0 = int(value)
-    if bin0 >= len(table) - 1:
-        return None
-
-    bin1 = bin0 + 1
-    alpha = value - bin0
-    return (1 - alpha) * table[bin0] + alpha * table[bin1]
-
-def score_structure(pdb_path, potentials, atom_name, cutoff, min_sep):
-    """
-    Compute score of an RNA structure using:
-      ✔ Euclidean distances
-      ✔ Linear interpolation
-      ✔ Intrachain-only pairs
-      ✔ Sequence separation ≥ min_sep
-      ✔ Steric clash detection (< 2 Å)
-    """
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure("rna", pdb_path)
-
-    atoms = extract_atoms(structure, atom_name)
-
-    # Initialize residue scores
-    residue_scores = {idx: 0.0 for idx, _, _, _ in atoms}
-    total_score = 0.0
-
-    n = len(atoms)
-
-    for i in range(n):
-        idx1, chain1, b1, a1 = atoms[i]
-
-        for j in range(i + min_sep, n):
-            idx2, chain2, b2, a2 = atoms[j]
-
-            # Require same chain (intrachain)
-            if chain1 != chain2:
-                continue
-
-            bp = get_base_pair(b1, b2)
-            if bp is None:
-                continue
-
-            dist = np.linalg.norm(a1.coord - a2.coord)
-
-            # Steric clash
-            if dist < 2.0:
-                print(f"[Warning] Steric clash between residues {idx1} and {idx2}: {dist:.2f} Å")
-                continue
-
-            if dist > cutoff:
-                continue
-
-            score = linear_interpolate(dist, potentials[bp])
-            if score is None:
-                continue
-
-            # Add score contribution
-            residue_scores[idx1] += score
-            residue_scores[idx2] += score
-            total_score += score
-
-    # Convert residue scores to sorted list for CSV export
-    profile = sorted(residue_scores.items())
-    return total_score, profile
-
-def save_csv_profile(profile, total_score, out_csv):
-    """Save profile + total score to CSV file."""
-    with open(out_csv, "w") as f:
-        f.write("position,score\n")
-        for pos, val in profile:
-            f.write(f"{pos},{val}\n")
-        f.write(f"\nTOTAL_SCORE,{total_score}\n")
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Score an RNA structure using trained statistical potentials.")
-
-    parser.add_argument("--input-pdb", required=True, help="Path to the PDB file.")
-    parser.add_argument("--output-csv", required=True, help="Output CSV path.")
-    parser.add_argument("--potentials-dir", required=True, help="Directory containing *.potential files.")
-
-    parser.add_argument("--cutoff", type=float, default=20.0, help="Maximum interaction distance.")
-    parser.add_argument("--min-sep", type=int, default=4, help="Minimum sequence separation.")
-    parser.add_argument("--atom", type=str, default="C3'", help="Atom name to use for distance calculations.")
-
-    args = parser.parse_args()
-
-    # Load potential files
-    potentials = {}
-    for bp in BASE_PAIRS:
-        fpath = os.path.join(args.potentials_dir, f"{bp}.potential")
-        potentials[bp] = np.loadtxt(fpath)
-
-    # Score structure
-    total, profile = score_structure(
-        args.input_pdb,
-        potentials,
-        args.atom,
-        args.cutoff,
-        args.min_sep
+# ----------------------------------------------------------------------
+# ARGUMENTS
+# ----------------------------------------------------------------------
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Score RNA structures using trained distance-based potentials."
     )
 
-    save_csv_profile(profile, total, args.output_csv)
+    parser.add_argument(
+        "input",
+        nargs="+",
+        help="PDB/mmCIF file(s) or a directory containing PDB/mmCIF files."
+    )
 
-    print(f"[OK] Scoring complete. Total score = {total:.3f}")
-    print(f"[OK] Profile saved to {args.output_csv}")
+    parser.add_argument(
+        "--atom-type", "-a",
+        type=str, default="C3'",
+        help="Atom used for distances (default: C3')."
+    )
+
+    parser.add_argument(
+        "--potentials-dir", "-p",
+        type=str, default="output/potentials",
+        help="Directory containing <BP>.potential files."
+    )
+
+    parser.add_argument(
+        "--csv-output", "-o",
+        type=str, default=None,
+        help="Save scores to CSV."
+    )
+
+    return parser.parse_args()
+
+
+# ----------------------------------------------------------------------
+# EXTRACT ATOMS
+# ----------------------------------------------------------------------
+def extract_atoms_from_chain(chain, atom_type="C3'"):
+    atoms = []
+    seq_idx = 0
+
+    for residue in chain:
+        name = residue.get_resname().upper()
+        if not name or name[0] not in {"A", "U", "C", "G"}:
+            continue
+
+        # find C3' or equivalent
+        atom = None
+        for a in residue:
+            if a.id.upper() in {atom_type.upper(), atom_type.replace("'", "*")}:
+                atom = a
+                break
+        if atom is None:
+            continue
+
+        atoms.append((seq_idx, name[0], np.array(atom.coord, float)))
+        seq_idx += 1
+
+    return atoms
+
+
+# ----------------------------------------------------------------------
+# COMPUTE ALL DISTANCES FOR EACH BASE PAIR
+# ----------------------------------------------------------------------
+def get_distances(structure, atom_type="C3'"):
+    distances = {bp: [] for bp in BASE_PAIRS}
+
+    for model in structure:
+        for chain in model:
+            atoms = extract_atoms_from_chain(chain, atom_type)
+            n = len(atoms)
+
+            for i in range(n):
+                _, base1, pos1 = atoms[i]
+
+                # minimum sequence separation = 4 (same logic as training)
+                for j in range(i + 4, n):
+                    _, base2, pos2 = atoms[j]
+
+                    d = float(np.linalg.norm(pos1 - pos2))
+                    if d <= 0:
+                        continue
+
+                    bp = "".join(sorted([base1, base2]))
+
+                    if bp in distances:
+                        distances[bp].append(d)
+
+        break  # single model only
+
+    return distances
+
+
+# ----------------------------------------------------------------------
+# LINEAR INTERPOLATION
+# ----------------------------------------------------------------------
+def interpolate(scoreprofile, dist):
+    bins, scores = scoreprofile
+
+    if dist <= bins[0]:
+        return scores[0]
+    if dist >= bins[-1]:
+        return scores[-1]
+
+    step = bins[1] - bins[0]
+    idx = int((dist - bins[0]) / step)
+
+    if idx >= len(scores) - 1:
+        return scores[-1]
+
+    d0 = bins[idx]
+    d1 = bins[idx + 1]
+    t = (dist - d0) / (d1 - d0)
+
+    return scores[idx] * (1 - t) + scores[idx + 1] * t
+
+
+# ----------------------------------------------------------------------
+# SCORE STRUCTURE
+# ----------------------------------------------------------------------
+def score_structure(distances, potentials):
+    total = 0.0
+
+    for bp in BASE_PAIRS:
+        if bp not in distances or bp not in potentials:
+            continue
+
+        dist_list = distances[bp]
+        profile = potentials[bp]  # (bins, scores)
+
+        for d in dist_list:
+            total += interpolate(profile, d)
+
+    return total
+
+
+# ----------------------------------------------------------------------
+# MAIN
+# ----------------------------------------------------------------------
+def main():
+    args = parse_args()
+
+    # Load potentials (distance + score)
+    potentials = load_all_potentials(args.potentials_dir)
+
+    PDBparser = PDB.PDBParser(QUIET=True)
+    CIFparser = PDB.MMCIFParser(QUIET=True)
+
+    results = {}
+
+    # If input is a directory → score all PDB files inside
+    if os.path.isdir(args.input[0]):
+        files = [
+            os.path.join(args.input[0], f)
+            for f in os.listdir(args.input[0])
+            if f.endswith((".pdb", ".cif"))
+        ]
+    else:
+        files = args.input
+
+    for filepath in files:
+        print(f"[INFO] Scoring {filepath}")
+
+        if filepath.endswith(".pdb"):
+            parser = PDBparser
+        elif filepath.endswith(".cif"):
+            parser = CIFparser
+        else:
+            print(f"[WARNING] Unsupported file format: {filepath}")
+            continue
+
+        structure = parser.get_structure("RNA", filepath)
+
+        # Extract raw distances for each base pair
+        dists = get_distances(structure, args.atom_type)
+
+        # Score using potentials
+        score = score_structure(dists, potentials)
+        results[os.path.basename(filepath)] = score
+
+        print(f" → Score = {score}")
+
+    # Save CSV if requested
+    if args.csv_output:
+        with open(args.csv_output, "w") as f:
+            for name, val in results.items():
+                f.write(f"{name},{val}\n")
+        print(f"[INFO] Scores written to {args.csv_output}")
+
+
+if __name__ == "__main__":
+    main()

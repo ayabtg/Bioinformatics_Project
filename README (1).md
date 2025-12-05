@@ -156,19 +156,21 @@ The plot helps identify:
 Train the potential:
 
 ```bash
- python TP_RNA/scripts/train_potential.py --data-dir data/pdb_train --output-dir output/potentials
+ python TP_RNA/scripts/train_potential.py TP_RNA/data/pdb_train --out-dir TP_RNA/output/potentials
+ 
 ```
 
 Score a structure:
 
 ```bash
-python scripts/score_structure.py data/pdb_test/<name>.pdb output/profiles/<name>.profile.csv --pot-dir output/potentials
+python TP_RNA/scripts/score_structure.py data/pdb_test/ output/profiles/ --pot-dir output/potentials
 ```
 
 Plot the profile:
 
 ```bash
-Rscript scripts/plot_profiles.R output/profiles/<name>.profile.csv output/plots/<name>.png
+ python TP_RNA/scripts/plot_potential.py     --potentials-dir TP_RNA/output/potentials     --output-dir TP_RNA/output/plots
+
 ```
 
 ##  Requirements

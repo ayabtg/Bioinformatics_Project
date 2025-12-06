@@ -90,12 +90,12 @@ These files represent trained distance-based statistical energy potentials.
    
 Place any RNA structures (.pdb format) to be placed in:
 ```
-TP_RNA/data/pdb_set/
+TP_RNA/data/pdb_test/
 ```
 2. Scoring Command:
 ```
 python TP_RNA/scripts/score_structure.py \
-    TP_RNA/data/pdb_set \
+    TP_RNA/data/pdb_test \
     --potentials-dir TP_RNA/output/potentials \
     --csv-output TP_RNA/output/profiles/scores.csv
 ```

@@ -39,26 +39,7 @@ python -c "import numpy, Bio, matplotlib"
 ```
 If no error appears, the environment is correctly set up.
 
-# Step 1 — Verify Scoring with Provided Data (Quick Validation)
-
-This step confirms that the existing trained potentials and test RNA structures work correctly.
-
-Command: 
-```
-python TP_RNA/scripts/score_structure.py \
-    TP_RNA/data/pdb_test \
-    --potentials-dir TP_RNA/output/potentials \
-    --csv-output TP_RNA/output/profiles/scores.csv
-```
-
-Expected Output:
-A file is created -
-```
-TP_RNA/output/profiles/scores.csv
-```
-If this file is created successfully, the scoring system is working correctly.
-
-# Step 2 — Training RNA Statistical Potentials
+# Step 1 — Training RNA Statistical Potentials
 
 1. Training Data:
    
@@ -84,6 +65,26 @@ CC.txt  CG.txt  GG.txt
 UC.txt  UG.txt  UU.txt 
 ```
 These files represent trained distance-based statistical energy potentials.
+
+# Step 2 — Verify Scoring with Provided Data (Quick Validation)
+
+This step confirms that the existing trained potentials and test RNA structures work correctly.
+
+Command: 
+```
+python TP_RNA/scripts/score_structure.py \
+    TP_RNA/data/pdb_test \
+    --potentials-dir TP_RNA/output/potentials \
+    --csv-output TP_RNA/output/profiles/scores.csv
+```
+
+Expected Output:
+A file is created -
+```
+TP_RNA/output/profiles/scores.csv
+```
+If this file is created successfully, the scoring system is working correctly.
+
 
 # Step 3 — Scoring New RNA Structures
 1. Input Data:

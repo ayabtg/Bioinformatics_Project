@@ -39,7 +39,7 @@ python -c "import numpy, Bio, matplotlib"
 ```
 If no error appears, the environment is correctly set up.
 
-# Step 1 — Training RNA Statistical Potentials
+# Step 1 — Training RNA Statistical Potentials (Step 1 and 2 is quick validation, the whole project starts from Step 3) 
 
 1. Training Data:
    

@@ -10,15 +10,15 @@ This README is written for a user who can follow the steps exactly in order and 
 ## Folder structure:
 
 ```
-Bioinformatics_Project-main/
 ├── TP_RNA/
 │   ├── data/
-│   │   ├── pdb_train/       # Training RNA structures (.pdb)
-│   │   └── pdb_test/        # Test RNA structures (.pdb)
+│   │   ├── pdb_train/        # Training RNA structures (.pdb)
+│   │   └── pdb_test/         # Test RNA structures (.pdb)
 │   │
 │   ├── output/
-│   │   ├── potentials/      # Trained potentials (.txt)
-│   │   └── profiles/        # Output score files (.csv)
+│   │   ├── potentials/       # Trained potentials (.txt)
+│   │   ├── profiles/         # Output score files (.csv)
+│   │   └── plots/            # plots of potentials
 │   │
 │   └── scripts/
 │       ├── train_potential.py

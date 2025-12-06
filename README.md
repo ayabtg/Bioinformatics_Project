@@ -12,16 +12,20 @@ This README is written for a user who can follow the steps exactly in order and 
 ```
 Bioinformatics_Project-main/
 ├── TP_RNA/
-│ ├── data/
-│ │ ├── pdb_train/ # Training RNA structures (.pdb)
-│ │ └── pdb_test/ # Test RNA structures (.pdb)
-│ ├── output/
-│ │ ├── potentials/ # Trained potentials (.txt)
-│ │ └── profiles/ # Output score files (.csv)
-│ └── scripts/
-│ ├── train_potential.py
-│ ├── score_structure.py
-│ └── plot_potential.py
+│   ├── data/
+│   │   ├── pdb_train/       # Training RNA structures (.pdb)
+│   │   └── pdb_test/        # Test RNA structures (.pdb)
+│   │
+│   ├── output/
+│   │   ├── potentials/      # Trained potentials (.txt)
+│   │   └── profiles/        # Output score files (.csv)
+│   │
+│   └── scripts/
+│       ├── train_potential.py
+│       ├── score_structure.py
+│       └── plot_potential.py
+│
+├── future_directions/
 └── README.md
 ```
 
